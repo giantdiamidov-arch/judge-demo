@@ -36,11 +36,10 @@
   .btn-start:active { background: #1a5a3a; }
 
   /* 入力画面 */
-  #scoring { display: none; flex-direction: column; height: 100svh; overflow: hidden; }
+  #scoring { display: none; flex-direction: column; height: 100svh; overflow: hidden; padding-top: 30px; /* デモバナー分 */ }
   .header {
     background: #1a2634; padding: 6px 14px; display: flex; align-items: center;
     justify-content: space-between; border-bottom: 1px solid #2a3a4a; flex-shrink: 0;
-    margin-top: 30px; /* デモバナー分 */
   }
   .header-info { font-size: 13px; color: #7a8a99; }
   .header-role { font-size: 14px; font-weight: 700; color: #4adf8f; }
@@ -58,7 +57,7 @@
   }
   .athlete-bar span { color: #fff; font-weight: 700; }
 
-  /* 進捗インジケーター */
+  /* 進捗アンジシータ */
   .progress-bar {
     background: #0f1923; padding: 5px 14px; border-bottom: 1px solid #1a2a3a;
     font-size: 12px; color: #7a8a99; flex-shrink: 0;
@@ -71,7 +70,7 @@
 
   .score-area { flex: 1; display: flex; flex-direction: column; padding: 6px 14px; overflow: hidden;
     padding-bottom: max(6px, env(safe-area-inset-bottom)); }
-  .score-label { font-size: 16px; font-weight: 800; color: #fff; letter-spacing: 0.05em; margin-bottom: 5px; }
+  .score-label { font-size: 16px; font-weight: 800; color: #fff; lettetter-spacing: 0.05em; margin-bottom: 5px; }
   .score-display {
     background: #1a2634; border: 2px solid #2a3a4a; border-radius: 14px;
     padding: 6px; text-align: center; font-size: 38px; font-weight: 700;
@@ -84,7 +83,7 @@
   .score-display.d-score { color: #df9f4a; }
   .score-display.d-score.has-value { border-color: #7a5a1a; }
 
-  /* テンキー */
+  /* テンクー */
   .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 6px; }
   .key {
     padding: 7px 0; background: #1a2634; border: 1px solid #2a3a4a; border-radius: 10px;
@@ -276,7 +275,7 @@
   const HINTS = {
     dScore: 'Dスコア（難度点）を入力してください。例：4.5 → 「4」「.」「5」の順にタップ',
     nd: 'ND（中立審判減点）を入力します。減点なしの場合はそのまま「次へ」を押してください（0扱い）',
-    stickBonus: 'スティックボーナス（着地ボーナス）を入力します。なければそのまま「次へ」または「送信」',
+    stickBonus: 'スヅィックボーナス（着地ボーナス）を入力します。なければそのまま「次へ」または「送信」',
     e1: 'E1スコア（実施点）を入力してください。0.0〜10.0の範囲で入力',
     e: 'Eスコア（実施点）を入力してください。0.0〜10.0の範囲で入力',
   };
@@ -395,7 +394,7 @@
         dScore: 'Dスコア入力',
         nd: 'ND（中立審判減点）入力',
         stickBonus: 'BONUS入力',
-        e1: 'E1スンア入力（0.0〜10.0）'
+        e1: 'E1スコア入力（0.0〜10.0）'
       };
       document.getElementById('score-label').textContent = labels[dStep];
 
