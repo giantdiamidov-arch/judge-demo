@@ -6,6 +6,7 @@
 <title>審判入力【練習用デモ】</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
   body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #0f1923; color: #fff; min-height: 100vh; }
 
   /* デモバナー */
@@ -35,8 +36,15 @@
   }
   .btn-start:active { background: #1a5a3a; }
 
-  /* 入力画面 */
-  #scoring { display: none; flex-direction: column; height: 100svh; overflow: hidden; padding-top: 30px; /* デモバナー分 */ }
+  /* 入力画面：画面サイズ（特にiOS Safariのアドレスバー等で可変する高さ）に確実に収まるよう、
+     100dvh + overflow-y:auto で構成する（overflow:hiddenで固定高にすると、機種によって
+     ボタンが画面外に隠れてしまうため）。 */
+  #scoring {
+    display: none; flex-direction: column;
+    height: 100svh; height: 100dvh;
+    overflow-y: auto;
+    padding-top: 30px; /* デモバナー分 */
+  }
   .header {
     background: #1a2634; padding: 6px 14px; display: flex; align-items: center;
     justify-content: space-between; border-bottom: 1px solid #2a3a4a; flex-shrink: 0;
@@ -57,20 +65,20 @@
   }
   .athlete-bar span { color: #fff; font-weight: 700; }
 
-  /* 進捗アンジシータ */
+  /* 進捗インジケーター */
   .progress-bar {
     background: #0f1923; padding: 5px 14px; border-bottom: 1px solid #1a2a3a;
     font-size: 12px; color: #7a8a99; flex-shrink: 0;
     display: flex; align-items: center; gap: 8px;
   }
-  .progress-dots { display: flex; gap: 4px; }
+  .progress-dots { display: flex; gap: 4px; flex-wrap: wrap; }
   .progress-dot { width: 8px; height: 8px; border-radius: 50%; background: #2a3a4a; }
   .progress-dot.done { background: #4adf8f; }
   .progress-dot.current { background: #dfaf4a; }
 
-  .score-area { flex: 1; display: flex; flex-direction: column; padding: 6px 14px; overflow: hidden;
-    padding-bottom: max(6px, env(safe-area-inset-bottom)); }
-  .score-label { font-size: 16px; font-weight: 800; color: #fff; lettetter-spacing: 0.05em; margin-bottom: 5px; }
+  .score-area { flex: 1; display: flex; flex-direction: column; padding: 6px 14px; min-height: 0;
+    padding-bottom: max(16px, env(safe-area-inset-bottom) + 10px); }
+  .score-label { font-size: 16px; font-weight: 800; color: #fff; letter-spacing: 0.05em; margin-bottom: 5px; }
   .score-display {
     background: #1a2634; border: 2px solid #2a3a4a; border-radius: 14px;
     padding: 6px; text-align: center; font-size: 38px; font-weight: 700;
@@ -83,7 +91,7 @@
   .score-display.d-score { color: #df9f4a; }
   .score-display.d-score.has-value { border-color: #7a5a1a; }
 
-  /* テンクー */
+  /* テンキー */
   .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 6px; }
   .key {
     padding: 7px 0; background: #1a2634; border: 1px solid #2a3a4a; border-radius: 10px;
@@ -179,6 +187,8 @@
       <option value="E2">E審判 2番</option>
       <option value="E3">E審判 3番</option>
       <option value="E4">E審判 4番</option>
+      <option value="E5">E審判 5番</option>
+      <option value="E6">E審判 6番</option>
     </select>
   </div>
 
@@ -267,15 +277,20 @@
   let apparatus, role;
   let currentInput = '';
   let submitted = false;
-  let dStep = 'dScore';
+  let dStep = 'dScore'; // 'dScore' | 'nd' | 'stickBonus' | 'e1'
   let dValues = { dScore: '', nd: '', stickBonus: '', e1: '' };
   let currentAthleteIdx = 0;
+
+  // D審判を兼ねる役割か（D単独／D+E1）
+  function isDRole() {
+    return role === 'D' || role === 'D+E1';
+  }
 
   // ヒントメッセージ
   const HINTS = {
     dScore: 'Dスコア（難度点）を入力してください。例：4.5 → 「4」「.」「5」の順にタップ',
     nd: 'ND（中立審判減点）を入力します。減点なしの場合はそのまま「次へ」を押してください（0扱い）',
-    stickBonus: 'スヅィックボーナス（着地ボーナス）を入力します。なければそのまま「次へ」または「送信」',
+    stickBonus: 'スティックボーナス（着地ボーナス）を入力します。なければそのまま「次へ」または「送信」',
     e1: 'E1スコア（実施点）を入力してください。0.0〜10.0の範囲で入力',
     e: 'Eスコア（実施点）を入力してください。0.0〜10.0の範囲で入力',
   };
@@ -297,7 +312,7 @@
     document.getElementById('hdr-apparatus').textContent = ap ? `${ap.icon} ${ap.gender} ${ap.label}` : apparatus;
 
     const disp = document.getElementById('score-display');
-    if (role === 'D' || role === 'D+E1') disp.classList.add('d-score');
+    if (isDRole()) disp.classList.add('d-score');
 
     buildProgressDots();
     loadAthlete();
@@ -341,7 +356,7 @@
     updateDisplay();
     document.getElementById('btn-submit').disabled = true;
     document.getElementById('btn-submit').className = 'btn-submit';
-    document.getElementById('btn-submit').textContent = (role === 'D' || role === 'D+E1') ? '次へ →' : '送信';
+    document.getElementById('btn-submit').textContent = isDRole() ? '次へ →' : '送信';
     document.getElementById('sent-msg').style.display = 'none';
     document.getElementById('btn-next').style.display = 'none';
     showHint();
@@ -349,10 +364,7 @@
 
   function showHint() {
     const hintEl = document.getElementById('hint-box');
-    let key;
-    if (role === 'D') key = dStep;
-    else if (role === 'D+E1') key = dStep;
-    else key = 'e';
+    const key = isDRole() ? dStep : 'e';
     const msg = HINTS[key];
     if (msg) {
       hintEl.textContent = '💡 ' + msg;
@@ -375,7 +387,7 @@
       if (currentInput.length >= 4) return;
       currentInput += k;
     }
-    if (role === 'D' || role === 'D+E1') dValues[dStep] = currentInput;
+    if (isDRole()) dValues[dStep] = currentInput;
     updateDisplay();
   }
 
@@ -383,13 +395,13 @@
     const disp = document.getElementById('score-display');
     disp.textContent = currentInput || '—';
 
-    const isDColorStep = (role === 'D') || (role === 'D+E1' && dStep !== 'e1');
+    const isDColorStep = isDRole() && dStep !== 'e1';
     disp.className = 'score-display' + (isDColorStep ? ' d-score' : '') + (currentInput ? ' has-value' : '');
 
     const num = parseFloat(currentInput);
     const valid = !isNaN(num) && num >= 0 && (role !== 'D' ? num <= 10.0 : true);
 
-    if (role === 'D' || role === 'D+E1') {
+    if (isDRole()) {
       const labels = {
         dScore: 'Dスコア入力',
         nd: 'ND（中立審判減点）入力',
@@ -434,7 +446,7 @@
   }
 
   function submitScore() {
-    if (role === 'D' || role === 'D+E1') {
+    if (isDRole()) {
       if (dStep === 'dScore') {
         const v = parseFloat(currentInput);
         if (isNaN(v) || v < 0) return;
